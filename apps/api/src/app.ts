@@ -12,6 +12,7 @@ import { openApiV1Document } from "./openapi-v1.js";
 import { adminRoutes } from "./routes/admin-routes.js";
 import { dropRoutes } from "./routes/drop-routes.js";
 import { sessionRoutes } from "./routes/session-routes.js";
+import { reservationRoutes } from "./routes/reservation-routes.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.get("/api/v1/health", (_req, res) => {
 app.use("/api/v1/sessions", sessionRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/drops", dropRoutes);
+app.use("/api/v1/drops/:dropId/reservations", reservationRoutes);
 
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiV1Document));
 app.get("/api/openapi.json", (_req, res) => res.json(openApiV1Document));
