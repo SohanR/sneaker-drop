@@ -1,3 +1,5 @@
+export * from "./api.js";
+
 export interface HealthResponse {
   status: "ok";
   service: "api" | "socket";
