@@ -1,6 +1,7 @@
 export * from "./api.js";
 export * from "./reservation.js";
 export * from "./settlement.js";
+export * from "./realtime.js";
 
 export interface HealthResponse {
   status: "ok";
