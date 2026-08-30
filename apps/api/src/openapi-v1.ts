@@ -5,7 +5,7 @@ const errorResponse = {
 
 export const openApiV1Document = {
   openapi: "3.1.0",
-  info: { title: "Sneaker Drop API", version: "0.5.0", description: "Inventory, reservations, expiration recovery, purchase settlement, and administration." },
+  info: { title: "Sneaker Drop API", version: "0.6.0", description: "Inventory, reservations, settlement, realtime token issuance, and administration." },
   servers: [{ url: "/api/v1" }],
   components: {
     securitySchemes: {
@@ -77,6 +77,12 @@ export const openApiV1Document = {
           { name: "Idempotency-Key", in: "header", required: true, schema: { type: "string", format: "uuid" } }
         ],
         responses: { "200": { description: "Idempotent replay" }, "201": { description: "Purchase completed" }, "401": errorResponse, "404": errorResponse, "409": errorResponse, "422": errorResponse }
+      }
+    },
+    "/realtime/token": {
+      post: {
+        summary: "Issue a short-lived Socket.IO token", security: [{ buyerCookie: [] }],
+        responses: { "200": { description: "Realtime JWT issued" }, "401": errorResponse }
       }
     }
   }

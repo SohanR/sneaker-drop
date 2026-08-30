@@ -15,6 +15,7 @@ import { sessionRoutes } from "./routes/session-routes.js";
 import { reservationRoutes } from "./routes/reservation-routes.js";
 import { settlementRoutes } from "./routes/settlement-routes.js";
 import { cronRoutes } from "./routes/cron-routes.js";
+import { realtimeRoutes } from "./routes/realtime-routes.js";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use("/api/v1/drops", dropRoutes);
 app.use("/api/v1/drops/:dropId/reservations", reservationRoutes);
 app.use("/api/v1/reservations/:reservationId", settlementRoutes);
 app.use("/api/v1/internal/cron", cronRoutes);
+app.use("/api/v1/realtime", realtimeRoutes);
 
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiV1Document));
 app.get("/api/openapi.json", (_req, res) => res.json(openApiV1Document));
