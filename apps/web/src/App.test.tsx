@@ -1,11 +1,14 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
-import { App } from "./App";
+import { describe, expect, it, vi } from "vitest";
+import { DashboardApp } from "./DashboardApp";
 
-describe("frontend foundation", () => {
-  it("renders the dashboard shell", () => {
-    const html = renderToStaticMarkup(<App />);
+vi.mock("./hooks/use-realtime", () => ({ useRealtime: () => "idle" }));
+
+describe("dashboard shell", () => {
+  it("renders the live-drop heading and accessible loading state", () => {
+    const html = renderToStaticMarkup(<DashboardApp />);
     expect(html).toContain("The next drop lands here.");
-    expect(html).toContain("Waiting for the first drop");
+    expect(html).toContain("Loading drops");
+    expect(html).toContain("Limited-edition live drops");
   });
 });
