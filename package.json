@@ -1,0 +1,20 @@
+{
+  "name": "sneaker-drop",
+  "private": true,
+  "version": "0.1.0",
+  "engines": { "node": ">=20 <23" },
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "concurrently -n api,socket,web -c blue,magenta,green \"npm:dev -w @sneaker-drop/api\" \"npm:dev -w @sneaker-drop/socket\" \"npm:dev -w @sneaker-drop/web\"",
+    "dev:api": "npm run dev -w @sneaker-drop/api",
+    "dev:socket": "npm run dev -w @sneaker-drop/socket",
+    "dev:web": "npm run dev -w @sneaker-drop/web",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.2"
+  }
+}
+
