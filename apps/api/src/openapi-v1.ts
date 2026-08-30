@@ -5,10 +5,13 @@ const errorResponse = {
 
 export const openApiV1Document = {
   openapi: "3.1.0",
-  info: { title: "Sneaker Drop API", version: "0.3.0", description: "Inventory, anonymous buyer sessions, and drop administration." },
+  info: { title: "Sneaker Drop API", version: "0.4.0", description: "Inventory, buyer sessions, atomic reservations, and drop administration." },
   servers: [{ url: "/api/v1" }],
   components: {
-    securitySchemes: { adminBearer: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
+    securitySchemes: {
+      adminBearer: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+      buyerCookie: { type: "apiKey", in: "cookie", name: "sneaker_drop_session" }
+    },
     schemas: {
       ApiError: {
         type: "object", required: ["error"],
@@ -54,6 +57,16 @@ export const openApiV1Document = {
           currency: { type: "string", default: "USD" }, totalStock: { type: "integer", minimum: 0 }, startsAt: { type: "string", format: "date-time" }
         } } } } },
         responses: { "201": { description: "Drop created" }, "401": errorResponse, "422": errorResponse }
+      }
+    },
+    "/drops/{dropId}/reservations": {
+      post: {
+        summary: "Reserve one unit for 60 seconds", security: [{ buyerCookie: [] }],
+        parameters: [
+          { name: "dropId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          { name: "Idempotency-Key", in: "header", required: true, schema: { type: "string", format: "uuid" } }
+        ],
+        responses: { "200": { description: "Idempotent replay" }, "201": { description: "Reservation created" }, "401": errorResponse, "404": errorResponse, "409": errorResponse, "422": errorResponse }
       }
     }
   }
