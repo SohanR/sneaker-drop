@@ -1,3 +1,5 @@
+import "./load-env.js";
+
 function value(name: string, developmentFallback: string) {
   const configured = process.env[name]?.trim();
   if (configured) {

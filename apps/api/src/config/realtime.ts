@@ -1,3 +1,5 @@
+import "./load-env.js";
+
 function secretValue() {
   const value = process.env.SOCKET_AUTH_SECRET?.trim();
   if (!value && process.env.NODE_ENV === "production") throw new Error("SOCKET_AUTH_SECRET is required in production");
@@ -19,4 +21,3 @@ export function getRealtimeConfig() {
     expiresInSeconds
   };
 }
-

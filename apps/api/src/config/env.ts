@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./load-env.js";
 import { z } from "zod";
 
 const schema = z.object({
@@ -18,4 +18,3 @@ export const env = {
   ...parsed.data,
   corsAllowedOrigins: parsed.data.CORS_ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
 };
-

@@ -1,3 +1,4 @@
+import "./load-env.js";
 import { Sequelize } from "sequelize";
 
 let database: Sequelize | undefined;
@@ -23,4 +24,3 @@ export function getDatabase() {
   database ??= createDatabase();
   return database;
 }
-

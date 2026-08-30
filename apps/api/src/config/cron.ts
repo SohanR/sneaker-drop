@@ -1,3 +1,5 @@
+import "./load-env.js";
+
 export function getCronConfig() {
   const secret = process.env.CRON_SECRET?.trim();
   if (!secret && process.env.NODE_ENV === "production") throw new Error("CRON_SECRET is required in production");
@@ -10,4 +12,3 @@ export function getCronConfig() {
   if (!Number.isInteger(maxBatches) || maxBatches <= 0) throw new Error("SWEEPER_MAX_BATCHES must be a positive integer");
   return { secret: secret || "development-only-cron-secret-change-me", batchSize, maxBatches };
 }
-
