@@ -5,7 +5,7 @@ const errorResponse = {
 
 export const openApiV1Document = {
   openapi: "3.1.0",
-  info: { title: "Sneaker Drop API", version: "0.4.0", description: "Inventory, buyer sessions, atomic reservations, and drop administration." },
+  info: { title: "Sneaker Drop API", version: "0.5.0", description: "Inventory, reservations, expiration recovery, purchase settlement, and administration." },
   servers: [{ url: "/api/v1" }],
   components: {
     securitySchemes: {
@@ -67,6 +67,16 @@ export const openApiV1Document = {
           { name: "Idempotency-Key", in: "header", required: true, schema: { type: "string", format: "uuid" } }
         ],
         responses: { "200": { description: "Idempotent replay" }, "201": { description: "Reservation created" }, "401": errorResponse, "404": errorResponse, "409": errorResponse, "422": errorResponse }
+      }
+    },
+    "/reservations/{reservationId}/complete": {
+      post: {
+        summary: "Complete a valid reservation", security: [{ buyerCookie: [] }],
+        parameters: [
+          { name: "reservationId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          { name: "Idempotency-Key", in: "header", required: true, schema: { type: "string", format: "uuid" } }
+        ],
+        responses: { "200": { description: "Idempotent replay" }, "201": { description: "Purchase completed" }, "401": errorResponse, "404": errorResponse, "409": errorResponse, "422": errorResponse }
       }
     }
   }
