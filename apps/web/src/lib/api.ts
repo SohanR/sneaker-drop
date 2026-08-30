@@ -17,6 +17,7 @@ export const api = axios.create({
 export const dashboardApi = {
   currentSession: () => api.get<BuyerSessionResponse>("/sessions/current").then((response) => response.data.data),
   createSession: (displayUsername: string) => api.post<BuyerSessionResponse>("/sessions", { displayUsername }).then((response) => response.data.data),
+  logout: () => api.delete("/sessions/current"),
   listDrops: () => api.get<DashboardDropsResponse>("/drops").then((response) => response.data.data),
   reserve: (dropId: string, idempotencyKey: string) => api.post<ReservationResponse>(
     `/drops/${dropId}/reservations`, {}, { headers: { "Idempotency-Key": idempotencyKey } }
@@ -39,4 +40,3 @@ export function apiErrorMessage(error: unknown) {
 export function isUnauthorized(error: unknown) {
   return error instanceof AxiosError && error.response?.status === 401;
 }
-

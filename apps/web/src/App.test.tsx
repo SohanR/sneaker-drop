@@ -9,6 +9,8 @@ describe("dashboard shell", () => {
     const html = renderToStaticMarkup(<DashboardApp />);
     expect(html).toContain("The next drop lands here.");
     expect(html).toContain("Loading drops");
-    expect(html).toContain("Limited-edition live drops");
+    expect(html).toContain("Limited-drop concurrency simulation");
+    expect(html).toContain("3-TIER DROP LAB");
+    expect(html).toContain("Md Mizanur Rahman");
   });
 });

@@ -11,8 +11,9 @@ describe("server-aligned countdowns", () => {
 
   it("clamps expired timestamps and formats countdowns", () => {
     expect(millisecondsUntil("2020-01-01T00:00:00.000Z", 0, Date.parse("2021-01-01T00:00:00.000Z"))).toBe(0);
-    expect(formatCountdown(60_000)).toBe("1:00");
-    expect(formatCountdown(1)).toBe("0:01");
+    expect(formatCountdown(60_000)).toBe("00:01:00");
+    expect(formatCountdown(1)).toBe("00:00:01");
+    expect(formatCountdown(356 * 60_000 + 45_000)).toBe("05:56:45");
   });
 
   it("formats prices with the supplied ISO currency", () => {

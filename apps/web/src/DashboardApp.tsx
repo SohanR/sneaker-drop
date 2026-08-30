@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { RefreshCw, ShieldCheck, TimerReset } from "lucide-react";
+import { Github, LoaderCircle, LogOut, RefreshCw, ShieldCheck, TimerReset } from "lucide-react";
 import type { BuyerSessionResponse, DashboardDrop, RealtimeEvent } from "@sneaker-drop/contracts";
 import { Toaster, toast } from "sonner";
 import { ConnectionStatus } from "./components/connection-status";
@@ -22,6 +22,7 @@ export function DashboardApp() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string>();
   const [creatingSession, setCreatingSession] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [reservingDropId, setReservingDropId] = useState<string>();
   const [purchaseHold, setPurchaseHold] = useState<ActiveHold | null>(null);
   const [purchasing, setPurchasing] = useState(false);
@@ -107,6 +108,21 @@ export function DashboardApp() {
     }
   };
 
+  const logout = async () => {
+    setLoggingOut(true);
+    try {
+      await dashboardApi.logout();
+      setSession(null);
+      setHolds({});
+      setPurchaseHold(null);
+      toast.success("Session ended successfully.");
+    } catch (error) {
+      toast.error(apiErrorMessage(error));
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
   const reserve = async (dropId: string) => {
     if (!session) return;
     setReservingDropId(dropId);
@@ -160,14 +176,19 @@ export function DashboardApp() {
       <Toaster theme="dark" richColors position="top-right" />
       <header className="border-b border-neutral-900 bg-neutral-950/90 px-5 py-4 backdrop-blur sm:px-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <div><p className="text-lg font-black tracking-tight">SOLE SIGNAL</p><p className="text-xs text-neutral-500">Limited-edition live drops</p></div>
-          <div className="flex items-center gap-3">{session && <span className="hidden text-sm text-neutral-400 sm:block">@{session.displayUsername}</span>}<ConnectionStatus status={connectionStatus} /></div>
+          <div><p className="text-lg font-black tracking-tight">3-TIER DROP LAB</p><p className="text-xs text-neutral-500">Limited-drop concurrency simulation</p></div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <a href="https://github.com/SohanR/sneaker-drop" target="_blank" rel="noreferrer" aria-label="View project on GitHub" className="rounded-md border border-neutral-800 p-2 text-neutral-400 transition hover:border-neutral-700 hover:text-white"><Github className="size-4" /></a>
+            {session && <span className="hidden text-sm text-neutral-400 lg:block">@{session.displayUsername}</span>}
+            <ConnectionStatus status={connectionStatus} />
+            {session && <Button variant="outline" className="px-3" disabled={loggingOut} onClick={() => void logout()}>{loggingOut ? <LoaderCircle className="size-4 animate-spin" /> : <LogOut className="size-4" />}<span className="ml-2 hidden sm:inline">Log out</span></Button>}
+          </div>
         </div>
       </header>
 
       <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
         <div className="mb-10 max-w-3xl">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-orange-400">Live inventory</p>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-orange-400">Three-tier inventory MVP</p>
           <h1 className="text-4xl font-black tracking-tight sm:text-6xl">The next drop lands here.</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-neutral-400">Race-safe reservations, a fair sixty-second checkout window, and stock updates delivered live.</p>
         </div>
@@ -184,6 +205,10 @@ export function DashboardApp() {
           <Feature icon={<ShieldCheck className="size-5" />} title="Atomic reservations">PostgreSQL decides the winner at the inventory row.</Feature>
           <Feature icon={<TimerReset className="size-5" />} title="Automatic recovery">Expired holds return to stock without browser timers controlling truth.</Feature>
         </div>
+
+        <footer className="mt-12 border-t border-neutral-900 py-8 text-center text-sm text-neutral-500">
+          Developed and implemented by <a href="https://mrsohan.netlify.app/" target="_blank" rel="noreferrer" className="font-semibold text-orange-400 transition hover:text-orange-300">Md Mizanur Rahman</a>
+        </footer>
       </section>
 
       <OnboardingDialog open={!loading && session === null} loading={creatingSession} onSubmit={createSession} />
