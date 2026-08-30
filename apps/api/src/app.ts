@@ -13,6 +13,8 @@ import { adminRoutes } from "./routes/admin-routes.js";
 import { dropRoutes } from "./routes/drop-routes.js";
 import { sessionRoutes } from "./routes/session-routes.js";
 import { reservationRoutes } from "./routes/reservation-routes.js";
+import { settlementRoutes } from "./routes/settlement-routes.js";
+import { cronRoutes } from "./routes/cron-routes.js";
 
 const app = express();
 
@@ -38,6 +40,8 @@ app.use("/api/v1/sessions", sessionRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/drops", dropRoutes);
 app.use("/api/v1/drops/:dropId/reservations", reservationRoutes);
+app.use("/api/v1/reservations/:reservationId", settlementRoutes);
+app.use("/api/v1/internal/cron", cronRoutes);
 
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiV1Document));
 app.get("/api/openapi.json", (_req, res) => res.json(openApiV1Document));
