@@ -13,7 +13,7 @@ A real-time inventory and reservation platform for limited-edition sneaker relea
 - Node.js 20.x (the supported production runtime)
 - npm 10+
 
-PostgreSQL, Redis, and their credentials are introduced in later phases and are not needed for the Phase 1 foundation.
+PostgreSQL is required for application state and the durable realtime outbox. The realtime service intentionally runs as one persistent instance without Redis.
 
 ## Install
 
@@ -77,4 +77,3 @@ api            Vercel serverless entry point
 ## Architecture boundary
 
 The stateless API will commit inventory changes and durable outbox events in PostgreSQL. The persistent socket service will relay committed events to clients. This keeps real-time delivery separate from short-lived Vercel request processes. PostgreSQL server time will be authoritative for drop starts and hold expiration.
-

@@ -5,7 +5,7 @@
 - Vercel serves the React application and stateless Express API.
 - Neon PostgreSQL will own inventory truth, temporal truth, transactions, and the durable event outbox.
 - Render or Railway hosts the persistent Socket.IO relay.
-- Redis will coordinate Socket.IO nodes when the relay is horizontally scaled.
+- The Socket.IO relay runs as exactly one persistent instance; Redis and horizontal socket replicas are intentionally out of scope.
 
 ## API conventions
 

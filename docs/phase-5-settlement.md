@@ -6,7 +6,7 @@
 2. Database-time expiration now has both lazy dashboard recovery and an authenticated Vercel cron sweeper.
 3. Purchase settlement now locks the reservation with `SELECT ... FOR UPDATE` before checking ownership, status, and expiry.
 
-Redis is not involved in inventory correctness. It is only an optional Phase 6 Socket.IO adapter when the persistent real-time service runs multiple replicas.
+Redis is not used. Inventory correctness and realtime handoff rely on PostgreSQL, while the Socket.IO relay runs as one persistent instance.
 
 ## Expiration cron
 
