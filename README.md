@@ -1,6 +1,6 @@
 # Sneaker Drop
 
-A real-time inventory and reservation platform for limited-edition sneaker releases. The project is currently at Phase 1: workspace, service contracts, health checks, Swagger, and the frontend foundation.
+A production-ready real-time inventory and reservation platform for limited-edition sneaker releases. It provides atomic PostgreSQL reservations, 60-second recovery, locked settlement, live Socket.IO updates, and a responsive React dashboard.
 
 ## Live links
 
@@ -61,6 +61,8 @@ Local endpoints:
 npm test
 npm run typecheck
 ```
+
+Production deployment and final-unit concurrency instructions are documented in `docs/deployment.md`. The Socket.IO service must remain at exactly one persistent instance; Redis is intentionally not used.
 
 Database migrations will be the only supported schema-management mechanism. Runtime `sequelize.sync()` is intentionally not part of the project.
 
