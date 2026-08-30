@@ -11,10 +11,14 @@
   },
   "dependencies": {
     "@sneaker-drop/contracts": "*",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
+    "pg": "^8.23.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.5"
   },
@@ -24,9 +28,9 @@
     "@types/node": "^22.18.0",
     "@types/supertest": "^6.0.3",
     "@types/swagger-ui-express": "^4.1.8",
+    "sequelize-cli": "^6.6.5",
     "supertest": "^7.1.4",
     "tsx": "^4.20.5",
     "vitest": "^3.2.4"
   }
 }
-
