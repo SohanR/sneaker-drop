@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./load-env.js";
 import { z } from "zod";
 
 const schema = z.object({
@@ -14,4 +14,3 @@ export const socketEnv = {
   ...parsed.data,
   allowedOrigins: parsed.data.SOCKET_ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
 };
-

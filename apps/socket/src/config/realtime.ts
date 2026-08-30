@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./load-env.js";
 
 function requiredSecret() {
   const value = process.env.SOCKET_AUTH_SECRET?.trim();
@@ -26,4 +26,3 @@ export function getRelayConfig() {
   if (!Number.isInteger(pollIntervalMs) || pollIntervalMs < 50) throw new Error("OUTBOX_POLL_INTERVAL_MS must be at least 50");
   return { databaseUrl, batchSize, pollIntervalMs, ssl: process.env.DB_SSL !== "false" };
 }
-
