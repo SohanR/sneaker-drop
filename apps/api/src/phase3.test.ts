@@ -17,12 +17,21 @@ describe("Phase 3 HTTP contracts", () => {
     expect(response.body.error.code).toBe("ADMIN_TOKEN_REQUIRED");
   });
 
+  it("protects buyer logout with the session cookie", async () => {
+    const response = await request(app).delete("/api/v1/sessions/current").expect(401);
+    expect(response.body.error.code).toBe("BUYER_SESSION_REQUIRED");
+  });
+
   it("documents sessions, login, dashboard reads, and protected drop creation", async () => {
     const response = await request(app).get("/api/openapi.json").expect(200);
     expect(response.body.paths).toHaveProperty("/sessions");
     expect(response.body.paths).toHaveProperty("/admin/login");
     expect(response.body.paths).toHaveProperty("/drops");
     expect(response.body.paths["/drops"].post.security).toEqual([{ adminBearer: [] }]);
+    expect(response.body.paths["/sessions/current"].delete.responses).toHaveProperty("204");
+    const formSchema = response.body.paths["/drops"].post.requestBody.content["application/x-www-form-urlencoded"].schema;
+    expect(formSchema.required).toContain("utcOffset");
+    expect(formSchema.properties.utcOffset.enum).toContain("GMT+06:00");
   });
 });
 

@@ -25,6 +25,7 @@ app.use(requestId);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: env.corsAllowedOrigins, credentials: true }));
 app.use(express.json({ limit: "32kb" }));
+app.use(express.urlencoded({ extended: false, limit: "32kb" }));
 app.use(cookieParser(getAuthConfig().sessionSecret));
 
 app.get("/api/v1/health", (_req, res) => {

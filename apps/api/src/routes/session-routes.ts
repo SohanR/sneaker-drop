@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { getAuthConfig } from "../config/auth.js";
 import { requireBuyer } from "../middleware/buyer-auth.js";
-import { createBuyerSession } from "../services/session-service.js";
+import { createBuyerSession, endBuyerSession } from "../services/session-service.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { parse } from "../utils/validation.js";
 
@@ -32,3 +32,14 @@ sessionRoutes.get("/current", requireBuyer, (req, res) => {
   res.json({ data: { id: session.id, displayUsername: session.displayUsername, expiresAt: session.expiresAt } });
 });
 
+sessionRoutes.delete("/current", requireBuyer, asyncHandler(async (_req, res) => {
+  const config = getAuthConfig();
+  await endBuyerSession(res.locals.buyerSession.id);
+  res.clearCookie(config.sessionCookieName, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/"
+  });
+  res.status(204).end();
+}));

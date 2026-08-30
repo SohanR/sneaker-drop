@@ -31,3 +31,6 @@ export async function findActiveBuyerSession(token: string) {
   return session;
 }
 
+export async function endBuyerSession(sessionId: string) {
+  await getModels().BuyerSession.update({ expiresAt: new Date() }, { where: { id: sessionId } });
+}

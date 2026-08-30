@@ -1,3 +1,16 @@
+import { GMT_OFFSETS } from "./utils/drop-input.js";
+
+const dropInputProperties = {
+  name: { type: "string", example: "Three-Tier Runner" },
+  description: { type: "string" },
+  imageUrl: { type: "string", format: "uri" },
+  price: { type: "number", minimum: 0, example: 199.99 },
+  currency: { type: "string", default: "USD", example: "USD" },
+  totalStock: { type: "integer", minimum: 0, example: 100 },
+  startsAtLocal: { type: "string", format: "date-time", example: "2026-09-01T18:00", description: "Date and clock time in the selected GMT offset" },
+  utcOffset: { type: "string", enum: GMT_OFFSETS, default: "GMT+06:00", description: "GMT+06:00 is Asia/Dhaka" }
+} as const;
+
 const errorResponse = {
   description: "Request failed",
   content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } }
@@ -40,7 +53,10 @@ export const openApiV1Document = {
         responses: { "201": { description: "Session created; signed HttpOnly cookie set" }, "422": errorResponse }
       }
     },
-    "/sessions/current": { get: { summary: "Read the current buyer session", responses: { "200": { description: "Active session" }, "401": errorResponse } } },
+    "/sessions/current": {
+      get: { summary: "Read the current buyer session", responses: { "200": { description: "Active session" }, "401": errorResponse } },
+      delete: { summary: "Log out and revoke the current buyer session", security: [{ buyerCookie: [] }], responses: { "204": { description: "Session ended and cookie cleared" }, "401": errorResponse } }
+    },
     "/admin/login": {
       post: {
         summary: "Authenticate an administrator",
@@ -52,10 +68,13 @@ export const openApiV1Document = {
       get: { summary: "List dashboard drops and recent purchasers", responses: { "200": { description: "Dashboard drop list" } } },
       post: {
         summary: "Create a merch drop", security: [{ adminBearer: [] }],
-        requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["name", "price", "totalStock", "startsAt"], properties: {
-          name: { type: "string" }, description: { type: "string" }, imageUrl: { type: "string", format: "uri" }, price: { type: "number", minimum: 0 },
-          currency: { type: "string", default: "USD" }, totalStock: { type: "integer", minimum: 0 }, startsAt: { type: "string", format: "date-time" }
-        } } } } },
+        requestBody: { required: true, content: {
+          "application/x-www-form-urlencoded": { schema: { type: "object", required: ["name", "price", "totalStock", "startsAtLocal", "utcOffset"], properties: dropInputProperties } },
+          "application/json": { schema: { type: "object", required: ["name", "price", "totalStock"], properties: {
+            ...dropInputProperties,
+            startsAt: { type: "string", format: "date-time", description: "Backward-compatible ISO timestamp alternative to startsAtLocal and utcOffset" }
+          } } }
+        } },
         responses: { "201": { description: "Drop created" }, "401": errorResponse, "422": errorResponse }
       }
     },
