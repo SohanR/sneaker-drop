@@ -4,6 +4,5 @@
     "types": ["node"],
     "rootDir": "../.."
   },
-  "include": ["src", "../../packages/contracts/src"]
+  "include": ["src", "../../api/index.ts", "../../packages/contracts/src"]
 }
-

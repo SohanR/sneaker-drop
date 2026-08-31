@@ -33,4 +33,11 @@ describe("production deployment contract", () => {
     expect(socketPackage).toContain("@socket.io/postgres-adapter");
     expect(socketPackage.toLowerCase()).not.toContain("redis");
   });
+
+  it("keeps Vercel function entries inside an explicit ESM package boundary", () => {
+    const functionPackage = JSON.parse(readFileSync(new URL("api/package.json", repositoryRoot), "utf8"));
+    const apiEntry = readFileSync(new URL("api/index.ts", repositoryRoot), "utf8");
+    expect(functionPackage.type).toBe("module");
+    expect(apiEntry).toContain("import(\"../apps/api/src/app.js\")");
+  });
 });
