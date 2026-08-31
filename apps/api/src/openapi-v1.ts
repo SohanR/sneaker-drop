@@ -64,6 +64,46 @@ export const openApiV1Document = {
         responses: { "200": { description: "JWT issued" }, "401": errorResponse, "422": errorResponse }
       }
     },
+    "/admin/race-condition-test": {
+      post: {
+        summary: "Prove atomic last-item reservation under concurrent load",
+        description: "Creates an isolated one-unit drop and temporary buyers, sends 100-200 concurrent requests through the real reservation service, verifies that exactly one reservation succeeds, and removes all diagnostic data.",
+        security: [{ adminBearer: [] }],
+        requestBody: {
+          required: false,
+          content: { "application/json": { schema: {
+            type: "object",
+            properties: { concurrency: { type: "integer", minimum: 100, maximum: 200, default: 100, example: 100 }
+            }
+          } } }
+        },
+        responses: {
+          "200": {
+            description: "Concurrency diagnostic completed and temporary data removed",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: { data: {
+                type: "object",
+                required: ["attemptedReservations", "successfulReservations", "soldOutConflicts", "unexpectedFailures", "finalAvailableStock", "persistedReservations", "invariantPassed", "durationMs", "cleanedUp"],
+                properties: {
+                  attemptedReservations: { type: "integer", example: 100 },
+                  successfulReservations: { type: "integer", example: 1 },
+                  soldOutConflicts: { type: "integer", example: 99 },
+                  unexpectedFailures: { type: "integer", example: 0 },
+                  finalAvailableStock: { type: "integer", example: 0 },
+                  persistedReservations: { type: "integer", example: 1 },
+                  invariantPassed: { type: "boolean", example: true },
+                  durationMs: { type: "integer", example: 420 },
+                  cleanedUp: { type: "boolean", example: true }
+                }
+              } }
+            } } }
+          },
+          "401": errorResponse,
+          "422": errorResponse
+        }
+      }
+    },
     "/drops": {
       get: { summary: "List dashboard drops and recent purchasers", responses: { "200": { description: "Dashboard drop list" } } },
       post: {

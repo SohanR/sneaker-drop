@@ -17,6 +17,7 @@ describe("production deployment contract", () => {
     expect(config.buildCommand).toBe("npm run build:web");
     expect(config.outputDirectory).toBe("apps/web/dist");
     expect(config.regions).toEqual(["sin1"]);
+    expect(config.functions["api/index.ts"]?.maxDuration).toBe(60);
     expect(config.functions["api/socket.ts"]?.maxDuration).toBe(60);
     expect(config.rewrites[0]).toEqual({ source: "/socket.io/(.*)", destination: "/api/socket" });
     expect(config.crons).toContainEqual({
