@@ -50,7 +50,7 @@ export const openApiV1Document = {
       post: {
         summary: "Create an anonymous buyer session",
         requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["displayUsername"], properties: { displayUsername: { type: "string", example: "sneaker_fan" } } } } } },
-        responses: { "201": { description: "Session created; signed HttpOnly cookie set" }, "422": errorResponse }
+        responses: { "201": { description: "Session created; opaque HttpOnly cookie set" }, "422": errorResponse }
       }
     },
     "/sessions/current": {

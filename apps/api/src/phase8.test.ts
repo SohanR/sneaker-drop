@@ -46,4 +46,13 @@ describe("production deployment contract", () => {
     expect(databaseConfig).toContain("import pg from \"pg\"");
     expect(databaseConfig).toContain("dialectModule: pg");
   });
+
+  it("uses opaque server-validated cookies without Vercel req.secret coupling", () => {
+    const appSource = readFileSync(new URL("apps/api/src/app.ts", repositoryRoot), "utf8");
+    const sessionRoutes = readFileSync(new URL("apps/api/src/routes/session-routes.ts", repositoryRoot), "utf8");
+    const buyerAuth = readFileSync(new URL("apps/api/src/middleware/buyer-auth.ts", repositoryRoot), "utf8");
+    expect(appSource).toContain("cookieParser()");
+    expect(sessionRoutes).not.toContain("signed: true");
+    expect(buyerAuth).toContain("req.cookies?");
+  });
 });

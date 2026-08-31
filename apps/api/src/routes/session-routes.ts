@@ -17,7 +17,6 @@ sessionRoutes.post("/", asyncHandler(async (req, res) => {
   const { token, session } = await createBuyerSession(input.displayUsername);
   const config = getAuthConfig();
   res.cookie(config.sessionCookieName, token, {
-    signed: true,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

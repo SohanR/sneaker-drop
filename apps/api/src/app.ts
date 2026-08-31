@@ -4,7 +4,6 @@ import express from "express";
 import helmet from "helmet";
 import type { HealthResponse } from "@sneaker-drop/contracts";
 import { env } from "./config/env.js";
-import { getAuthConfig } from "./config/auth.js";
 import { errorHandler, notFound } from "./middleware/errors.js";
 import { requestId } from "./middleware/request-id.js";
 import { openApiV1Document } from "./openapi-v1.js";
@@ -26,7 +25,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: env.corsAllowedOrigins, credentials: true }));
 app.use(express.json({ limit: "32kb" }));
 app.use(express.urlencoded({ extended: false, limit: "32kb" }));
-app.use(cookieParser(getAuthConfig().sessionSecret));
+app.use(cookieParser());
 
 app.get("/api/v1/health", (_req, res) => {
   const response: HealthResponse = {
