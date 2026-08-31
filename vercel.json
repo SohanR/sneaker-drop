@@ -2,9 +2,14 @@
   "version": 2,
   "buildCommand": "npm run build:web",
   "outputDirectory": "apps/web/dist",
+  "regions": ["sin1"],
+  "functions": {
+    "api/socket.ts": { "maxDuration": 60 }
+  },
   "rewrites": [
+    { "source": "/socket.io/(.*)", "destination": "/api/socket" },
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
-  "crons": [{ "path": "/api/v1/internal/cron/expire-reservations", "schedule": "* * * * *" }]
+  "crons": [{ "path": "/api/v1/internal/cron/expire-reservations", "schedule": "0 0 * * *" }]
 }

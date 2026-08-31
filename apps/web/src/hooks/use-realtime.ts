@@ -25,9 +25,11 @@ export function useRealtime(enabled: boolean, dropIds: string[], onEvent: (event
       try {
         const { token } = await dashboardApi.realtimeToken();
         if (disposed) return;
-        socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3001", {
+        const socketUrl = import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? window.location.origin : "http://localhost:3001");
+        socket = io(socketUrl, {
+          path: "/socket.io",
           auth: { token },
-          transports: ["websocket", "polling"],
+          transports: ["websocket"],
           withCredentials: true
         });
         socket.on("connect", () => {
