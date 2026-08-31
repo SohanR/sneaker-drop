@@ -24,7 +24,7 @@ describe("database models", () => {
 describe("database migrations", () => {
   it("contains an executable, reversible migration for every table", async () => {
     const files = readdirSync(`${databaseDirectory}/migrations`).sort();
-    expect(files).toHaveLength(5);
+    expect(files).toHaveLength(6);
     const createdTables: string[] = [];
     const droppedTables: string[] = [];
     const queryInterface = {
@@ -39,8 +39,8 @@ describe("database migrations", () => {
     for (const file of files) await require(`${databaseDirectory}/migrations/${file}`).up(queryInterface, Sequelize);
     for (const file of [...files].reverse()) await require(`${databaseDirectory}/migrations/${file}`).down(queryInterface, Sequelize);
 
-    expect(createdTables).toEqual(["users", "buyer_sessions", "drops", "reservations", "event_outbox"]);
-    expect(droppedTables).toEqual(["event_outbox", "reservations", "drops", "buyer_sessions", "users"]);
+    expect(createdTables).toEqual(["users", "buyer_sessions", "drops", "reservations", "event_outbox", "socket_io_attachments"]);
+    expect(droppedTables).toEqual(["socket_io_attachments", "event_outbox", "reservations", "drops", "buyer_sessions", "users"]);
   });
 });
 

@@ -1,6 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "types": ["node"], "rootDir": "../.." },
-  "include": ["src", "../../packages/contracts/src"]
+  "include": ["src", "../../api/socket.ts", "../../packages/contracts/src"]
 }
-

@@ -3,11 +3,14 @@ import { socketEnv } from "./config/env.js";
 import { getRelayConfig } from "./config/realtime.js";
 import { createRelayPool } from "./database.js";
 import { OutboxRelay } from "./outbox-relay.js";
+import { configurePostgresAdapter } from "./postgres-adapter.js";
 
 const { httpServer, io } = createSocketServer(socketEnv.allowedOrigins);
 const relayConfig = getRelayConfig();
+const pool = createRelayPool();
+configurePostgresAdapter(io, pool);
 const relay = new OutboxRelay({
-  pool: createRelayPool(),
+  pool,
   io,
   batchSize: relayConfig.batchSize,
   pollIntervalMs: relayConfig.pollIntervalMs
