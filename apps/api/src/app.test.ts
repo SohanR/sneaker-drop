@@ -19,4 +19,11 @@ describe("API foundation", () => {
     const response = await request(app).get("/api/openapi.json").expect(200);
     expect(response.body.openapi).toBe("3.1.0");
   });
+
+  it("serves Swagger with absolute CDN assets safe behind Vercel rewrites", async () => {
+    const response = await request(app).get("/api/docs").expect(200).expect("content-type", /html/);
+    expect(response.text).toContain("https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css");
+    expect(response.text).toContain("url: \"/api/openapi.json\"");
+    expect(response.text).not.toContain("/api/docs/swagger-ui-bundle.js");
+  });
 });

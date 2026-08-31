@@ -2,7 +2,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
-import swaggerUi from "swagger-ui-express";
 import type { HealthResponse } from "@sneaker-drop/contracts";
 import { env } from "./config/env.js";
 import { getAuthConfig } from "./config/auth.js";
@@ -16,6 +15,7 @@ import { reservationRoutes } from "./routes/reservation-routes.js";
 import { settlementRoutes } from "./routes/settlement-routes.js";
 import { cronRoutes } from "./routes/cron-routes.js";
 import { realtimeRoutes } from "./routes/realtime-routes.js";
+import { swaggerHtml } from "./swagger-html.js";
 
 const app = express();
 
@@ -46,7 +46,7 @@ app.use("/api/v1/reservations/:reservationId", settlementRoutes);
 app.use("/api/v1/internal/cron", cronRoutes);
 app.use("/api/v1/realtime", realtimeRoutes);
 
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiV1Document));
+app.get("/api/docs", (_req, res) => res.type("html").send(swaggerHtml));
 app.get("/api/openapi.json", (_req, res) => res.json(openApiV1Document));
 app.use(notFound);
 app.use(errorHandler);

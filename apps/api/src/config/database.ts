@@ -1,4 +1,5 @@
 import "./load-env.js";
+import pg from "pg";
 import { Sequelize } from "sequelize";
 
 let database: Sequelize | undefined;
@@ -7,6 +8,7 @@ export function createDatabase(connectionString = process.env.DATABASE_URL) {
   if (!connectionString) throw new Error("DATABASE_URL is required to connect to PostgreSQL");
   return new Sequelize(connectionString, {
     dialect: "postgres",
+    dialectModule: pg,
     logging: process.env.DB_LOGGING === "true" ? console.log : false,
     pool: {
       max: Number(process.env.DB_POOL_MAX || 5),

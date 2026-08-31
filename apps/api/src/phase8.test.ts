@@ -40,4 +40,10 @@ describe("production deployment contract", () => {
     expect(functionPackage.type).toBe("module");
     expect(apiEntry).toContain("import(\"../apps/api/src/app.js\")");
   });
+
+  it("makes the dynamically loaded Sequelize PostgreSQL driver traceable", () => {
+    const databaseConfig = readFileSync(new URL("apps/api/src/config/database.ts", repositoryRoot), "utf8");
+    expect(databaseConfig).toContain("import pg from \"pg\"");
+    expect(databaseConfig).toContain("dialectModule: pg");
+  });
 });
