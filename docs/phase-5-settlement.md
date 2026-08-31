@@ -6,11 +6,11 @@
 2. Database-time expiration now has both lazy dashboard recovery and an authenticated Vercel cron sweeper.
 3. Purchase settlement now locks the reservation with `SELECT ... FOR UPDATE` before checking ownership, status, and expiry.
 
-Redis is not used. Inventory correctness and realtime handoff rely on PostgreSQL, while the Socket.IO relay runs as one persistent instance.
+Redis is not used. Inventory correctness, durable realtime handoff, and cross-instance Socket.IO broadcasts rely on PostgreSQL.
 
 ## Expiration cron
 
-Vercel invokes `GET /api/v1/internal/cron/expire-reservations` every minute. It sends `Authorization: Bearer <CRON_SECRET>`. Each invocation processes bounded `FOR UPDATE SKIP LOCKED` batches and reports whether more work may remain.
+Vercel invokes `GET /api/v1/internal/cron/expire-reservations` with `Authorization: Bearer <CRON_SECRET>`. The checked-in Hobby schedule is daily; Pro deployments may run every minute. Lazy dashboard reads remain the immediate recovery path. Each invocation processes bounded `FOR UPDATE SKIP LOCKED` batches.
 
 ## Purchase settlement
 

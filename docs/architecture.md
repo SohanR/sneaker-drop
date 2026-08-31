@@ -2,10 +2,10 @@
 
 ## Runtime ownership
 
-- Vercel serves the React application and stateless Express API.
+- Vercel serves the React application, stateless Express API, cron, and Socket.IO WebSocket Function.
 - Neon PostgreSQL will own inventory truth, temporal truth, transactions, and the durable event outbox.
-- Render or Railway hosts the persistent Socket.IO relay.
-- The Socket.IO relay runs as exactly one persistent instance; Redis and horizontal socket replicas are intentionally out of scope.
+- The official Socket.IO PostgreSQL adapter distributes broadcasts between active Vercel Function instances.
+- Redis is intentionally out of scope; WebSocket clients reconnect at the Vercel Function duration boundary.
 
 ## API conventions
 
@@ -17,7 +17,7 @@
 
 ## Reliability boundary
 
-Vercel request handlers do not emit authoritative state directly to Socket.IO. A state mutation and its outbox event will commit in one database transaction. Delivery is at-least-once, so real-time events carry unique IDs and monotonic stock versions for client deduplication and reconciliation.
+API request handlers do not emit authoritative state directly to Socket.IO. A state mutation and its outbox event commit in one database transaction. A relay claims each event and emits through the PostgreSQL Socket.IO adapter, which reaches clients across active Vercel instances. Delivery is at-least-once, so events carry unique IDs and monotonic stock versions for client deduplication and API reconciliation after reconnects.
 
 ## Schema management
 

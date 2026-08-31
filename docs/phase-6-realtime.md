@@ -1,8 +1,10 @@
 # Phase 6 Realtime Delivery
 
-## Deployment constraint
+## Vercel deployment model
 
-The Socket.IO service must run as exactly one persistent Render/Railway instance. Redis is intentionally not used. Do not configure horizontal replicas: separate socket processes would have separate client sets, while an outbox row is claimed by only one relay.
+Socket.IO runs as a Vercel WebSocket Function. Vercel may create multiple bounded-lifetime instances, so the official Socket.IO PostgreSQL adapter fans a relay emission out to clients connected to every active instance. Redis is intentionally not used.
+
+The browser uses WebSocket-only transport, reconnects when Vercel reaches the Function duration limit, and reconciles inventory through the API.
 
 The API remains stateless and horizontally scalable because it only writes PostgreSQL state and outbox rows.
 
@@ -10,7 +12,7 @@ The API remains stateless and horizontally scalable because it only writes Postg
 
 1. The browser creates or restores its signed buyer session.
 2. It calls `POST /api/v1/realtime/token` with credentials enabled.
-3. It connects to `VITE_SOCKET_URL` with the returned JWT in `auth.token`.
+3. In production it connects to the same-origin `/socket.io` endpoint with the JWT in `auth.token`. A local `VITE_SOCKET_URL` remains available for development.
 4. The socket joins the `dashboard` room automatically.
 5. Product-specific listeners emit `drop:subscribe` with a drop UUID and check the acknowledgement.
 

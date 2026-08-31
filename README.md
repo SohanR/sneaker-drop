@@ -13,7 +13,7 @@ A production-ready real-time inventory and reservation platform for limited-edit
 - Node.js 20.x (the supported production runtime)
 - npm 10+
 
-PostgreSQL is required for application state and the durable realtime outbox. The realtime service intentionally runs as one persistent instance without Redis.
+PostgreSQL is required for application state, the durable realtime outbox, and cross-instance Socket.IO broadcasts. Production runs the frontend, API, and WebSocket endpoint in one Vercel project without Redis.
 
 ## Install
 
@@ -62,7 +62,7 @@ npm test
 npm run typecheck
 ```
 
-Production deployment and final-unit concurrency instructions are documented in `docs/deployment.md`. The Socket.IO service must remain at exactly one persistent instance; Redis is intentionally not used.
+Production deployment and final-unit concurrency instructions are documented in `docs/deployment.md`. Vercel WebSocket Function instances coordinate through Neon PostgreSQL; Redis is intentionally not used.
 
 Database migrations will be the only supported schema-management mechanism. Runtime `sequelize.sync()` is intentionally not part of the project.
 
@@ -70,7 +70,7 @@ Database migrations will be the only supported schema-management mechanism. Runt
 
 ```text
 apps/api       Express API and Vercel handler
-apps/socket    Persistent Socket.IO service
+apps/socket    Socket.IO service and PostgreSQL broadcast adapter
 apps/web       React and Vite frontend
 packages/contracts  Shared HTTP and real-time contracts
 api            Vercel serverless entry point
@@ -78,4 +78,4 @@ api            Vercel serverless entry point
 
 ## Architecture boundary
 
-The stateless API will commit inventory changes and durable outbox events in PostgreSQL. The persistent socket service will relay committed events to clients. This keeps real-time delivery separate from short-lived Vercel request processes. PostgreSQL server time will be authoritative for drop starts and hold expiration.
+The stateless API commits inventory changes and durable outbox events in PostgreSQL. A Vercel WebSocket Function relays committed events, and the Socket.IO PostgreSQL adapter distributes broadcasts across active function instances. PostgreSQL server time remains authoritative for drop starts and hold expiration.

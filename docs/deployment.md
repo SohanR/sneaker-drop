@@ -1,57 +1,104 @@
-# Production deployment
+# Deploy everything to Vercel
 
-The production topology is Vercel for the Vite application and stateless Express API, Neon for PostgreSQL, and one persistent Render Socket.IO service. Redis is intentionally not part of this architecture.
+Production URL: `https://limited-sneaker-drop.vercel.app`
 
-## 1. Neon
+The Vite frontend, Express API, expiration cron, and Socket.IO WebSocket endpoint deploy in one Vercel project. Neon PostgreSQL provides inventory truth, the durable outbox, and cross-instance Socket.IO broadcasting. Redis is not used.
 
-1. Create a production database and keep its pooled application URL separate from its direct migration URL.
-2. Set `DATABASE_URL` to the pooled URL in Vercel and Render.
-3. Set `DATABASE_MIGRATION_URL` to the direct URL only in the trusted migration environment.
-4. Run `npm run db:migrate` once per release before routing production traffic. Never run migrations from application startup.
-5. Seed an initial administrator only when required, then rotate or remove bootstrap credentials.
+Vercel WebSockets are currently a Public Beta feature. Connections follow Function duration limits, so the browser reconnects automatically and refreshes canonical inventory after reconnecting.
 
-## 2. Render Socket.IO relay
+## 1. Rotate exposed local credentials
 
-Create the service from `render.yaml`. Keep `numInstances` at exactly `1`; this is the Redis-free delivery topology. Configure:
+The earlier Neon password and session secret that appeared in `.env.example` must be considered compromised. Rotate the Neon database password and generate fresh independent production secrets before deployment. Keep real values only in local `.env` and Vercel's encrypted Environment Variables settings.
 
-- `DATABASE_URL`
-- `SOCKET_AUTH_SECRET`
-- `SOCKET_ALLOWED_ORIGINS=https://<vercel-domain>`
+## 2. Prepare Neon
 
-The socket secret, issuer, and audience must exactly match their Vercel API values. Verify `GET /health` before deploying the frontend.
+Use the pooled Neon URL for application traffic and the direct URL for migrations:
 
-## 3. Vercel application and API
-
-Import the repository with the repository root as the project root. `vercel.json` builds `apps/web` and routes `/api/*` to the Express function while serving SPA routes from the Vite output.
-
-Configure all production values listed in `.env.example`. In particular:
-
-- Use independent random values of at least 32 characters for session, pepper, admin JWT, socket JWT, and cron secrets.
-- Set `VITE_API_BASE_URL=/api/v1` so cookies remain first-party.
-- Set `VITE_SOCKET_URL` to the HTTPS Render service URL.
-- Set both CORS origin lists to the exact Vercel application origin.
-- Keep API and socket database pools small enough for the Neon connection limit.
-
-Vercel Cron calls the expiration route every minute and supplies `CRON_SECRET` as its bearer credential.
-
-## 4. Release order
-
-1. Back up production data and run reviewed migrations.
-2. Deploy or restart the single socket relay and verify its health endpoint.
-3. Deploy Vercel and verify API health, Swagger, session cookies, and websocket connection.
-4. Create a one-unit test drop and perform the reservation/settlement smoke test.
-5. Watch API errors, database connections, outbox retry count, and relay logs during the release window.
-
-## Final-unit concurrency verification
-
-Install k6 separately, create a started drop with exactly one available unit, then run:
-
-```bash
-k6 run -e API_URL=https://<app-domain>/api/v1 -e DROP_ID=<drop-uuid> tests/load/final-unit.js
+```env
+DATABASE_URL=postgresql://...-pooler.../neondb?sslmode=require
+DATABASE_MIGRATION_URL=postgresql://.../neondb?sslmode=require
 ```
 
-The test passes only when one request returns success and the other 99 return conflict. Use a disposable drop because the winner creates a real pending reservation.
+Run locally with the production database URLs configured:
 
-## Rollback
+```bash
+npm run db:migrate
+npm run db:migrate:status
+```
 
-Roll application revisions back through Vercel and Render. Database migrations require a reviewed forward-fix or the matching Sequelize undo only when that undo is proven safe for production data. Never force-sync or reset the production database.
+All six migrations must show `up`, including `create-socket-io-attachments`. Migrations never run during Vercel startup.
+
+If an administrator is not present, set strong temporary `SEED_ADMIN_USERNAME` and `SEED_ADMIN_PASSWORD` values locally, run `npm run db:seed`, then remove those values.
+
+## 3. Create the Vercel project
+
+1. In Vercel, choose **Add New > Project** and import `SohanR/sneaker-drop`.
+2. Set the project name to `limited-sneaker-drop`. The resulting production URL should be `https://limited-sneaker-drop.vercel.app` if that name is available in your account.
+3. Keep the project root as the repository root (`./`).
+4. Let `vercel.json` supply the build command and output directory.
+5. Enable Fluid Compute if the project dashboard presents that option. WebSocket support otherwise requires no code-side toggle.
+
+## 4. Add Vercel environment variables
+
+Add these to **Production** (and Preview only if you intend to test previews):
+
+```env
+NODE_ENV=production
+DATABASE_URL=<new pooled Neon URL>
+DB_SSL=true
+DB_LOGGING=false
+DB_POOL_MAX=3
+DB_POOL_MIN=0
+DB_POOL_IDLE_MS=5000
+DB_POOL_ACQUIRE_MS=20000
+SOCKET_DB_POOL_MAX=3
+
+CORS_ALLOWED_ORIGINS=https://limited-sneaker-drop.vercel.app
+SOCKET_ALLOWED_ORIGINS=https://limited-sneaker-drop.vercel.app
+
+SESSION_SECRET=<unique random value, at least 32 characters>
+SESSION_TOKEN_PEPPER=<different random value, at least 32 characters>
+ADMIN_JWT_SECRET=<different random value, at least 32 characters>
+SOCKET_AUTH_SECRET=<different random value, at least 32 characters>
+CRON_SECRET=<different random value, at least 32 characters>
+
+SESSION_TTL_SECONDS=604800
+SESSION_COOKIE_NAME=sneaker_drop_session
+ADMIN_JWT_ISSUER=sneaker-drop-api
+ADMIN_JWT_AUDIENCE=sneaker-drop-admin
+ADMIN_JWT_EXPIRES_IN_SECONDS=900
+SOCKET_TOKEN_ISSUER=sneaker-drop-api
+SOCKET_TOKEN_AUDIENCE=sneaker-drop-socket
+SOCKET_TOKEN_EXPIRES_IN_SECONDS=300
+RESERVATION_TTL_SECONDS=60
+SWEEPER_BATCH_SIZE=100
+SWEEPER_MAX_BATCHES=10
+OUTBOX_BATCH_SIZE=100
+OUTBOX_POLL_INTERVAL_MS=250
+```
+
+Do not add `DATABASE_MIGRATION_URL`, seed credentials, or local ports to Vercel. Do not set `VITE_API_BASE_URL` or `VITE_SOCKET_URL` in production: the frontend intentionally uses same-origin `/api/v1` and `/socket.io`, which avoids cross-origin browser requests and CORS errors.
+
+## 5. Deploy
+
+Click **Deploy**. The Vercel routes are:
+
+- `/` and SPA paths: Vite frontend
+- `/api/v1/*`: Express API
+- `/api/docs`: Swagger UI
+- `/socket.io/*`: Socket.IO WebSocket Function
+
+The Hobby-compatible manifest uses a 60-second WebSocket function duration and a daily cron. Socket.IO reconnects automatically. Lazy expiration runs during inventory reads, so an open dashboard still restores expired holds at the 60-second boundary. On Vercel Pro, you may change `maxDuration` to `300` and the cron schedule to `* * * * *`.
+
+## 6. Production smoke test
+
+1. Open `https://limited-sneaker-drop.vercel.app/api/v1/health` and expect `200`.
+2. Open `https://limited-sneaker-drop.vercel.app/api/docs`.
+3. Create a buyer session and confirm the secure `sneaker_drop_session` cookie is set.
+4. Confirm the dashboard connection badge becomes **Live**.
+5. In browser DevTools, verify the Socket.IO request upgrades with status `101` at `wss://limited-sneaker-drop.vercel.app/socket.io/`.
+6. Open two browsers, reserve an item in one, and confirm stock updates in the other.
+7. Wait longer than 60 seconds and confirm the WebSocket reconnects and inventory stays correct.
+8. Test logout and confirm `/api/v1/sessions/current` then returns `401`.
+
+If the API works but WebSocket upgrade does not, confirm the deployment was created after Vercel's WebSocket Public Beta availability, Fluid Compute is enabled, and no Vercel environment variable overrides `VITE_SOCKET_URL` with an old Render or localhost URL.

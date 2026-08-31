@@ -13,7 +13,7 @@ Phase 7 delivers the buyer-facing dashboard for browsing drops, creating a cooki
 
 ## Runtime configuration
 
-The frontend uses `VITE_API_BASE_URL` and `VITE_SOCKET_URL`. The realtime service remains a single persistent Socket.IO instance backed by the PostgreSQL outbox. Redis is not used or required.
+Development may set `VITE_API_BASE_URL` and `VITE_SOCKET_URL`. Production defaults to same-origin `/api/v1` and `/socket.io`, avoiding cross-origin requests. Socket.IO uses the PostgreSQL outbox and PostgreSQL adapter; Redis is not used or required.
 
 ## Automated verification
 
