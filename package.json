@@ -10,11 +10,11 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently -n api,socket,web -c blue,magenta,green \"npm:dev -w @sneaker-drop/api\" \"npm:dev -w @sneaker-drop/socket\" \"npm:dev -w @sneaker-drop/web\"",
-    "dev:api": "npm run dev -w @sneaker-drop/api",
-    "dev:socket": "npm run dev -w @sneaker-drop/socket",
-    "dev:web": "npm run dev -w @sneaker-drop/web",
-    "build:web": "npm run build -w @sneaker-drop/web",
+    "dev": "node init && concurrently -n api,socket,web -c blue,magenta,green \"npm:dev -w @sneaker-drop/api\" \"npm:dev -w @sneaker-drop/socket\" \"npm:dev -w @sneaker-drop/web\"",
+    "dev:api": "node init && npm run dev -w @sneaker-drop/api",
+    "dev:socket": "node init && npm run dev -w @sneaker-drop/socket",
+    "dev:web": "node init && npm run dev -w @sneaker-drop/web",
+    "build:web": "node init && npm run build -w @sneaker-drop/web",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "db:migrate": "sequelize-cli db:migrate",
